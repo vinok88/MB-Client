@@ -27,22 +27,52 @@ import javax.jms.JMSException;
 public class LoopRunner {
     private static Logger log = Logger.getLogger(LoopRunner.class);
 
-    public static void runPublisher(AndesQueuePublisher queueClient, int numberOfMessages) throws JMSException {
+    public static void runPublisher(AndesQueuePublisher queueClient, int numberOfMessages)
+            throws JMSException {
         queueClient.connect();
+
+        long startTime = System.nanoTime();
         for (int i = 1; i <= numberOfMessages; i++) {
+            if (i%100 == 0) {
+                log.info(i + " messages sent.");
+            }
+
             String message = "Test Message " + i;
             queueClient.send(message);
-            log.info("Sent: " + message);
+            if (log.isDebugEnabled()) {
+                log.debug("Sent: " + message);
+            }
         }
+        long endTime = System.nanoTime();
         queueClient.disconnect();
+
+        logPerformanceStats(endTime - startTime, numberOfMessages);
+    }
+
+    private static void logPerformanceStats(long timeSpent, int numberOfMessages) {
+        double throughput = (numberOfMessages / (timeSpent * 1.0)) * 1000000000;
+        log.info("========================================");
+        log.info("TPS: " + throughput + " msg/sec");
     }
 
     public static void runSubscriber(AndesQueueSubscriber queueClient, int numberOfMessages)
             throws JMSException {
         queueClient.connect();
+
+        long startTime = System.nanoTime();
         for (int i = 1; i <= numberOfMessages; i++) {
-            log.info("Received: " + queueClient.receive());
+            if (i%100 == 0) {
+                log.info(i + " messages received.");
+            }
+
+            String message = queueClient.receive();
+            if (log.isDebugEnabled()) {
+                log.debug("Received: " + message);
+            }
         }
+        long endTime = System.nanoTime();
         queueClient.disconnect();
+
+        logPerformanceStats(endTime-startTime, numberOfMessages);
     }
 }
