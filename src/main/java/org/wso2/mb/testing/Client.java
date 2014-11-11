@@ -19,8 +19,10 @@
 package org.wso2.mb.testing;
 
 import org.apache.log4j.Logger;
-import org.wso2.mb.testing.jms.AndesQueuePublisher;
-import org.wso2.mb.testing.jms.AndesQueueSubscriber;
+import org.wso2.mb.testing.client.jms.AndesQueuePublisher;
+import org.wso2.mb.testing.client.jms.AndesQueueSubscriber;
+import org.wso2.mb.testing.client.jms.ClientBuilder;
+import org.wso2.mb.testing.runner.LoopRunner;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -35,31 +37,19 @@ public class Client {
         String action = args[0];
         int numberOfMessages = Integer.valueOf(args[1]);
 
+        ClientBuilder builder = new ClientBuilder("admin", "admin", "TestQueue");
         try {
             if ("receive".equals(action)) {
-                AndesQueueSubscriber queueClient = new AndesQueueSubscriber.Builder("admin",
-                                                                                    "admin",
-                                                                                    "TestQueue")
-                        .build();
-                queueClient.connect();
-
-                for (int i = 0; i < numberOfMessages; i++) {
-                    log.info(queueClient.receive());
-                }
+                AndesQueueSubscriber queueClient = builder.buildSubscriber();
+                LoopRunner.runSubscriber(queueClient, numberOfMessages);
             } else if ("send".equals(action)) {
-                AndesQueuePublisher queueClient = new AndesQueuePublisher.Builder("admin",
-                                                                                  "admin",
-                                                                                  "TestQueue")
-                        .build();
-                queueClient.connect();
-                for (int i = 0; i < numberOfMessages; i++) {
-                    queueClient.send("Test Message");
-                }
+                AndesQueuePublisher queueClient = builder.buildPublisher();
+                LoopRunner.runPublisher(queueClient, numberOfMessages);
             }
         } catch (NamingException e) {
-            log.error("Error while creating receiving client. Please check given arguments.", e);
+            log.error("Error while creating client. Please check given arguments.", e);
         } catch (JMSException e) {
-            log.error("Error occurred while receiving message", e);
+            log.error("Error occurred while receiving/sending message", e);
         }
 
         System.exit(0);

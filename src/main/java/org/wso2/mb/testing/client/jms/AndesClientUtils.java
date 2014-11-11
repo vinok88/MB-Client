@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.mb.testing.jms;
+package org.wso2.mb.testing.client.jms;
 
 public class AndesClientUtils {
 
