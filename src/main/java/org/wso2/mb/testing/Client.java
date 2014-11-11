@@ -35,9 +35,10 @@ public class Client {
 
     public static void main(String[] args) {
         String action = args[0];
-        int numberOfMessages = Integer.valueOf(args[1]);
+        String destination = args[1];
+        int numberOfMessages = Integer.valueOf(args[2]);
 
-        ClientBuilder builder = new ClientBuilder("admin", "admin", "TestQueue");
+        ClientBuilder builder = new ClientBuilder("admin", "admin", destination);
         try {
             if ("receive".equals(action)) {
                 AndesQueueSubscriber queueClient = builder.buildSubscriber();
