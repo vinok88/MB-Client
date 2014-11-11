@@ -33,23 +33,35 @@ public class Client {
 
     public static void main(String[] args) {
         String action = args[0];
+        int numberOfMessages = Integer.valueOf(args[1]);
 
         try {
             if ("receive".equals(action)) {
-                AndesQueueSubscriber queueClient = new AndesQueueSubscriber.Builder("admin", "admin", "TestQueue")
+                AndesQueueSubscriber queueClient = new AndesQueueSubscriber.Builder("admin",
+                                                                                    "admin",
+                                                                                    "TestQueue")
                         .build();
                 queueClient.connect();
-                log.info(queueClient.receive());
+
+                for (int i = 0; i < numberOfMessages; i++) {
+                    log.info(queueClient.receive());
+                }
             } else if ("send".equals(action)) {
-                AndesQueuePublisher queueClient = new AndesQueuePublisher.Builder("admin", "admin", "TestQueue")
+                AndesQueuePublisher queueClient = new AndesQueuePublisher.Builder("admin",
+                                                                                  "admin",
+                                                                                  "TestQueue")
                         .build();
                 queueClient.connect();
-                queueClient.send("Test Message");
+                for (int i = 0; i < numberOfMessages; i++) {
+                    queueClient.send("Test Message");
+                }
             }
         } catch (NamingException e) {
             log.error("Error while creating receiving client. Please check given arguments.", e);
         } catch (JMSException e) {
-            log.error("Error occured while receiving message", e);
+            log.error("Error occurred while receiving message", e);
         }
+
+        System.exit(0);
     }
 }

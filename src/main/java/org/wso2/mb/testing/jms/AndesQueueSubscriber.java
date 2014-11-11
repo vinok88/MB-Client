@@ -25,6 +25,7 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueReceiver;
 import javax.jms.QueueSession;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -72,8 +73,8 @@ public class AndesQueueSubscriber {
      * @return
      * @throws JMSException
      */
-    public javax.jms.Message receive() throws JMSException {
-        return consumer.receive();
+    public String receive() throws JMSException {
+        return ((TextMessage) consumer.receive()).getText();
     }
 
     public static class Builder {
