@@ -34,11 +34,13 @@ public class Client {
     private static Logger log = Logger.getLogger(Client.class);
 
     public static void main(String[] args) {
-        String action = args[0];
-        String destination = args[1];
-        int numberOfMessages = Integer.valueOf(args[2]);
+        String hostname = args[0];
+        int port = Integer.valueOf(args[1]);
+        String action = args[2];
+        String destination = args[3];
+        int numberOfMessages = Integer.valueOf(args[4]);
 
-        ClientBuilder builder = new ClientBuilder("admin", "admin", destination);
+        ClientBuilder builder = new ClientBuilder("admin", "admin", destination).brokerHost(hostname).port(port);
         try {
             if ("receive".equals(action)) {
                 AndesQueueSubscriber queueClient = builder.buildSubscriber();
@@ -49,10 +51,16 @@ public class Client {
             }
         } catch (NamingException e) {
             log.error("Error while creating client. Please check given arguments.", e);
+            showHelp();
         } catch (JMSException e) {
             log.error("Error occurred while receiving/sending message", e);
         }
 
         System.exit(0);
+    }
+
+    private static void showHelp() {
+        log.info("Usage:");
+        log.info("java -jar target/mb-client-0.0.1.jar <hostname> <port> <send/receive> <Queue name> <Number of messages>");
     }
 }
