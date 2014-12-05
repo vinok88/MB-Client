@@ -35,6 +35,11 @@ public class LoopRunner {
         for (int i = 1; i <= numberOfMessages; i++) {
             if (i%100 == 0) {
                 log.info(i + " messages sent.");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignore) {
+                    // Ignore
+                }
             }
 
             String message = "Test Message " + i;
