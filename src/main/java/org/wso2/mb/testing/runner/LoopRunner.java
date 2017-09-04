@@ -21,6 +21,7 @@ package org.wso2.mb.testing.runner;
 import org.apache.log4j.Logger;
 import org.wso2.mb.testing.client.jms.AndesQueuePublisher;
 import org.wso2.mb.testing.client.jms.AndesQueueSubscriber;
+import org.wso2.mb.testing.client.jms.AndesTopicSubscriber;
 
 import javax.jms.JMSException;
 
@@ -35,6 +36,7 @@ public class LoopRunner {
         for (int i = 1; i <= numberOfMessages; i++) {
             if (i%100 == 0) {
                 log.info(i + " messages sent.");
+                System.out.println(i + " messages sent.");
             }
 
             String message = "Test Message " + i;
@@ -42,6 +44,7 @@ public class LoopRunner {
             if (log.isDebugEnabled()) {
                 log.debug("Sent: " + message);
             }
+            System.out.println("Sent: " + message);
         }
         long endTime = System.nanoTime();
         queueClient.disconnect();
@@ -63,15 +66,40 @@ public class LoopRunner {
         for (int i = 1; i <= numberOfMessages; i++) {
             if (i%100 == 0) {
                 log.info(i + " messages received.");
+                System.out.println(i + " messages received.");
             }
 
             String message = queueClient.receive();
             if (log.isDebugEnabled()) {
                 log.debug("Received: " + message);
             }
+            System.out.println("Received: " + message);
         }
         long endTime = System.nanoTime();
         queueClient.disconnect();
+
+        logPerformanceStats(endTime-startTime, numberOfMessages);
+    }
+
+    public static void runTopicSubscriber(AndesTopicSubscriber topicClient, int numberOfMessages)
+            throws JMSException {
+        topicClient.connect();
+
+        long startTime = System.nanoTime();
+        for (int i = 1; i <= numberOfMessages; i++) {
+            if (i%100 == 0) {
+                log.info(i + " messages received.");
+                System.out.println(i + " messages received.");
+            }
+
+            String message = topicClient.receive();
+            if (log.isDebugEnabled()) {
+                log.debug("Received: " + message);
+            }
+            System.out.println("Received: " + message);
+        }
+        long endTime = System.nanoTime();
+        topicClient.disconnect();
 
         logPerformanceStats(endTime-startTime, numberOfMessages);
     }

@@ -19,8 +19,11 @@
 package org.wso2.mb.testing;
 
 import org.apache.log4j.Logger;
+import org.wso2.mb.testing.client.jms.AndesClientUtils;
 import org.wso2.mb.testing.client.jms.AndesQueuePublisher;
 import org.wso2.mb.testing.client.jms.AndesQueueSubscriber;
+import org.wso2.mb.testing.client.jms.AndesTopicPublisher;
+import org.wso2.mb.testing.client.jms.AndesTopicSubscriber;
 import org.wso2.mb.testing.client.jms.ClientBuilder;
 import org.wso2.mb.testing.runner.LoopRunner;
 
@@ -39,15 +42,40 @@ public class Client {
         String action = args[2];
         String destination = args[3];
         int numberOfMessages = Integer.valueOf(args[4]);
+        String type = AndesClientUtils.QUEUE;
+        if (args.length > 5) {
+            type = args[5];
+        }
 
-        ClientBuilder builder = new ClientBuilder("admin", "admin", destination).brokerHost(hostname).port(port);
+
+        ClientBuilder builder = new ClientBuilder("admin", "admin", destination, type).brokerHost(hostname).port
+                (port);
         try {
-            if ("receive".equals(action)) {
-                AndesQueueSubscriber queueClient = builder.buildSubscriber();
-                LoopRunner.runSubscriber(queueClient, numberOfMessages);
-            } else if ("send".equals(action)) {
-                AndesQueuePublisher queueClient = builder.buildPublisher();
-                LoopRunner.runPublisher(queueClient, numberOfMessages);
+            if (AndesClientUtils.QUEUE.equals(type)) {
+                if ("receive".equals(action)) {
+                    AndesQueueSubscriber queueClient = builder.buildSubscriber();
+                    LoopRunner.runSubscriber(queueClient, numberOfMessages);
+                } else if ("send".equals(action)) {
+                    AndesQueuePublisher queueClient = builder.buildPublisher();
+                    LoopRunner.runPublisher(queueClient, numberOfMessages);
+                } else if ("create".equals(action)) {
+                    AndesQueuePublisher queueClient = builder.buildPublisher();
+                    queueClient.create(destination);
+                    queueClient.send("test");
+                }
+            } else {
+                if ("receive".equals(action)) {
+                    AndesTopicSubscriber topicClient = builder.buildTopicSubscriber();
+                    LoopRunner.runTopicSubscriber(topicClient, numberOfMessages);
+                } else if ("send".equals(action)) {
+                    AndesTopicPublisher topicClient = builder.buildTopicPublisher();
+                    topicClient.send("test message");
+//                    LoopRunner.runPublisher(topicClient, numberOfMessages);
+                } else if ("create".equals(action)) {
+                    AndesTopicPublisher topicClient = builder.buildTopicPublisher();
+                    topicClient.create(destination);
+                    topicClient.send("test");
+                }
             }
         } catch (NamingException e) {
             log.error("Error while creating client. Please check given arguments.", e);

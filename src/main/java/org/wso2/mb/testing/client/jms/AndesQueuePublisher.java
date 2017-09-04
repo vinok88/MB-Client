@@ -71,7 +71,13 @@ public class AndesQueuePublisher {
      * @throws javax.jms.JMSException
      */
     public void send(String message) throws JMSException {
+        connect();
         Message jmsMessage = session.createTextMessage(message);
         publisher.send(jmsMessage);
+    }
+
+    public Queue create(String queue) throws JMSException {
+        connect();
+        return session.createQueue(queue);
     }
 }

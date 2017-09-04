@@ -18,8 +18,12 @@
 
 package org.wso2.mb.testing.client.jms;
 
+import org.wso2.andes.jms.TopicSubscriber;
+
 import javax.jms.Queue;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.Topic;
+import javax.jms.TopicConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -32,16 +36,18 @@ public class ClientBuilder {
     private final String username;
     private final String password;
     private final String destinationName;
+    private final String type;
 
     // Initialized to default parameters
     private String brokerHost = "localhost";
     private int port = AndesClientUtils.ANDES_DEFAULT_PORT;
     private InitialContext initialContext;
 
-    public ClientBuilder(String username, String password, String destinationName) {
+    public  ClientBuilder(String username, String password, String destinationName, String type) {
         this.username = username;
         this.password = password;
         this.destinationName = destinationName;
+        this.type = type;
     }
 
     public ClientBuilder brokerHost(String hostname) {
@@ -64,6 +70,16 @@ public class ClientBuilder {
         return new AndesQueuePublisher(this);
     }
 
+    public AndesTopicSubscriber buildTopicSubscriber() throws NamingException {
+        createInitialContext();
+        return new AndesTopicSubscriber(this);
+    }
+
+    public AndesTopicPublisher buildTopicPublisher() throws NamingException {
+        createInitialContext();
+        return new AndesTopicPublisher(this);
+    }
+
     private void createInitialContext() throws NamingException {
         Properties contextProperties = createContextProperties();
         this.initialContext = new InitialContext(contextProperties);
@@ -79,7 +95,7 @@ public class ClientBuilder {
                                                                              this.port);
         contextProperties.put("connectionfactory." + connectionFactory,
                               connectionString);
-        contextProperties.put("queue." + this.destinationName, this.destinationName);
+        contextProperties.put(this.type + "." + this.destinationName, this.destinationName);
         return contextProperties;
     }
 
@@ -88,7 +104,16 @@ public class ClientBuilder {
                 ClientBuilder.connectionFactory);
     }
 
+    TopicConnectionFactory getTopicConnectionFactory(ClientBuilder builder) throws NamingException {
+        return (TopicConnectionFactory) builder.initialContext.lookup(
+                ClientBuilder.connectionFactory);
+    }
+
     Queue getDestination(ClientBuilder builder) throws NamingException {
         return (Queue) builder.initialContext.lookup(builder.destinationName);
+    }
+
+    Topic getTopicDestination(ClientBuilder builder) throws NamingException {
+        return (Topic) builder.initialContext.lookup(builder.destinationName);
     }
 }
